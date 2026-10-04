@@ -1,0 +1,179 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum JobSource {
+  JSEARCH
+  ADZUNA
+  GREENHOUSE
+  LEVER
+  REMOTIVE
+  MANUAL
+}
+
+enum ApplicationStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  APPLIED
+  INTERVIEWING
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+enum Sponsorship {
+  NOT_REQUIRED
+  REQUIRED
+  UNKNOWN
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  profiles  Profile[]
+  createdAt DateTime  @default(now())
+}
+
+model Profile {
+  id           String              @id @default(cuid())
+  userId       String
+  name         String
+  fullName     String?
+  email        String?             // contact details: used to fill application forms, never sent to the AI
+  phone        String?
+  linkedinUrl  String?
+  websiteUrl   String?
+  headline     String?
+  location     String?
+  summary      String?             @db.Text
+  skills       Json                @default("[]")
+  experience   Json                @default("[]")
+  education    Json                @default("[]")
+  certifications Json              @default("[]")
+  languages    Json                @default("[]")
+  workAuth     WorkAuthorization[]
+  cvs          CV[]
+  matches      Match[]
+  applications Application[]
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@index([userId])
+}
+
+model WorkAuthorization {
+  id          String      @id @default(cuid())
+  profileId   String
+  countryCode String
+  sponsorship Sponsorship
+  profile     Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, countryCode])
+}
+
+model CV {
+  id           String        @id @default(cuid())
+  profileId    String
+  storageKey   String
+  fileName     String
+  mimeType     String
+  rawText      String        @db.Text
+  parsedData   Json
+  isPrimary    Boolean       @default(false)
+  applications Application[]
+  profile      Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now())
+
+  @@index([profileId])
+}
+
+model Job {
+  id                String        @id @default(cuid())
+  source            JobSource
+  externalId        String
+  url               String
+  title             String
+  company           String
+  publisher         String?
+  applyIsDirect     Boolean?
+  applyOptions      Json          @default("[]")   // [{ publisher, url, isDirect }]
+  location          String?
+  countryCode       String?
+  remote            Boolean       @default(false)
+  description       String        @db.Text
+  salaryMin         Int?
+  salaryMax         Int?
+  currency          String?
+  offersSponsorship Boolean?
+  sponsorEvidence   String?
+  postedAt          DateTime?
+  fetchedAt         DateTime      @default(now())
+  matches           Match[]
+  applications      Application[]
+
+  @@unique([source, externalId])
+  @@index([countryCode, postedAt])
+  @@index([publisher])
+}
+
+model Match {
+  id        String   @id @default(cuid())
+  profileId String
+  jobId     String
+  score     Int
+  reasons   Json
+  aiModel   String
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([profileId, jobId])
+  @@index([jobId])
+}
+
+model Application {
+  id          String            @id @default(cuid())
+  profileId   String
+  jobId       String
+  cvId        String?
+  status      ApplicationStatus @default(DRAFT)
+  coverLetter String?           @db.Text
+  subject     String?
+  usedFacts   Json              @default("[]")
+  notes       String?           @db.Text
+  approvedAt  DateTime?
+  appliedAt   DateTime?
+  // Applier service: a claim is a lease, so a crashed worker's job becomes available again
+  claimedAt     DateTime?
+  claimedBy     String?
+  applyAttempts Int       @default(0)
+  applyChannel  String?   // "greenhouse", "lever", "ashby", "manual", ...
+  applyNote     String?   // last message from the applier, shown in the queue
+  profile     Profile           @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  job         Job               @relation(fields: [jobId], references: [id])
+  cv          CV?               @relation(fields: [cvId], references: [id], onDelete: SetNull)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@unique([profileId, jobId])
+  @@index([jobId])
+  @@index([status])
+  @@index([status, claimedAt])
+}
+
+// Caches JSearch calls so repeated searches don't burn API quota
+model SearchRun {
+  id      String   @id @default(cuid())
+  key     String   @unique
+  params  Json
+  jobIds  Json
+  ranAt   DateTime @default(now())
+}

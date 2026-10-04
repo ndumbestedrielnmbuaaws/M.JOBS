@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>AI Job Applier</h1>
+      <button id="settings-toggle" class="quiet" type="button">Settings</button>
+    </header>
+
+    <form id="settings" hidden>
+      <label for="url">App address</label>
+      <input id="url" type="url" placeholder="http://localhost:3000" />
+      <label for="token">Worker token</label>
+      <input id="token" type="password" placeholder="WORKER_TOKEN from the app's .env" />
+      <button class="primary" type="submit">Save</button>
+    </form>
+
+    <p id="status" role="status"></p>
+    <ul id="list"></ul>
+    <p class="foot">Nothing is submitted for you. Check the form, then press the site's own apply button.</p>
+    <script src="popup.js"></script>
+  </body>
+</html>

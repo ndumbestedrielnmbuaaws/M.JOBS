@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+/*
+  Palette: cool paper and petrol ink, like a filing ledger.
+  Spruce means "go" (strong match, approved), amber means "waiting for you", brick means "stop".
+*/
+@theme {
+  --color-paper: #eef1ec;
+  --color-panel: #fbfcfa;
+  --color-ink: #17242b;
+  --color-muted: #56676d;
+  --color-line: #d3d9d0;
+  --color-spruce: #1f6b55;
+  --color-spruce-soft: #dcebe4;
+  --color-amber: #9a5f0c;
+  --color-amber-soft: #f4e6cf;
+  --color-brick: #9e3b2b;
+  --color-brick-soft: #f3dcd6;
+
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-public-sans), ui-sans-serif, sans-serif;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-spruce);
+  outline-offset: 2px;
+}
+
+@layer components {
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    line-height: 1.15;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 6px;
+    padding: 0.5rem 0.9rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border: 1px solid var(--color-line);
+    background: var(--color-panel);
+    color: var(--color-ink);
+    white-space: nowrap;
+  }
+  .btn:hover:not(:disabled) { border-color: var(--color-muted); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--color-ink);
+    border-color: var(--color-ink);
+    color: var(--color-panel);
+  }
+  .btn-primary:hover:not(:disabled) { background: #26363f; border-color: #26363f; }
+  .btn-approve {
+    background: var(--color-spruce);
+    border-color: var(--color-spruce);
+    color: #fff;
+  }
+  .btn-approve:hover:not(:disabled) { background: #185846; border-color: #185846; }
+  .btn-quiet { border-color: transparent; background: transparent; }
+  .btn-quiet:hover:not(:disabled) { background: var(--color-line); border-color: transparent; }
+
+  .label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    margin-bottom: 0.3rem;
+  }
+  .input {
+    width: 100%;
+    border-radius: 6px;
+    border: 1px solid var(--color-line);
+    background: var(--color-panel);
+    padding: 0.5rem 0.65rem;
+    font-size: 0.925rem;
+  }
+  .input:focus { outline: 2px solid var(--color-spruce); outline-offset: 0; border-color: transparent; }
+  textarea.input { line-height: 1.55; }
+
+  .panel {
+    background: var(--color-panel);
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

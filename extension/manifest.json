@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "AI Job Applier",
+  "version": "1.0.0",
+  "description": "Fills job application forms with your approved application from AI Job Applier. You always press submit yourself.",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "host_permissions": ["http://localhost:3000/*", "http://127.0.0.1:3000/*"],
+  "action": { "default_popup": "popup.html", "default_title": "AI Job Applier" },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.linkedin.com/*",
+        "https://*.indeed.com/*",
+        "https://*.indeed.co.uk/*",
+        "https://*.totaljobs.com/*",
+        "https://*.seek.com.au/*",
+        "https://*.seek.co.nz/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
